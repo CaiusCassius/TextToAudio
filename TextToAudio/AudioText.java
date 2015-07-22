@@ -9,6 +9,7 @@ import javax.sound.midi.*;
 import java.util.Scanner;
 import java.lang.*;
 //Created by Matthew Flanders
+//Created July 2015
 //Text-Music program
 
 public class AudioText {
