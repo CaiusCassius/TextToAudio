@@ -1,0 +1,14 @@
+#BlueJ class context
+comment0.params=args
+comment0.target=void\ main(java.lang.String[])
+comment1.params=note\ channel\ dur\ vol\ bass
+comment1.target=void\ play(int,\ int,\ int,\ int,\ int)
+comment2.params=
+comment2.target=void\ controlLoop()
+comment3.params=
+comment3.target=void\ getInput()
+comment4.params=
+comment4.target=void\ findBpm()
+comment5.params=s
+comment5.target=void\ noteCalc(java.lang.String)
+numComments=6
