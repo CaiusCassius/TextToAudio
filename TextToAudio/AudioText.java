@@ -1,10 +1,4 @@
 
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.Synthesizer;
-import javax.sound.midi.MidiChannel;
-import javax.sound.midi.Instrument;
-import javax.sound.midi.Sequence;
-import javax.sound.midi.Sequencer;
 import javax.sound.midi.*;
 import java.util.Scanner;
 import java.lang.*;
@@ -14,8 +8,10 @@ import java.lang.*;
 
 public class AudioText {
     public static int bpm = 0;
-    public static boolean quarter = false;
-
+    public static int key = 60;
+    public static boolean quart = true;
+    public static boolean maj = true;
+    public static boolean hasBass = true;
     public static void main( String[] args ) {
         controlLoop();
     }
@@ -29,10 +25,14 @@ public class AudioText {
             MidiChannel[] channels = syn.getChannels();
             
             channels[channel].noteOn( note, vol );
+            if(hasBass){
             channels[channel].noteOn( bass, vol );
+           }
             Thread.sleep( dur );
             channels[channel].noteOff( note );
+             if(hasBass){
             channels[channel].noteOff( bass );
+           }
 
           }
            catch (Exception e) {
@@ -47,18 +47,69 @@ public class AudioText {
     
     public static void getInput(){
         String s;
-        String s2;
-        Scanner in = new Scanner(System.in);
-        System.out.println("Do you want all quarter notes?");
-        s2 = in.nextLine();
-        Scanner in2 = new Scanner(System.in);
-        System.out.println("Enter some text:");
-        s = in.nextLine();
-        if(s2 == "yes"){
-            quarter = true;           
-        } else{
-            quarter = false;
+        String findKey;
+        String isMaj;
+        String isQuart;
+        String isTreb;
+        Scanner in1 = new Scanner(System.in);
+        System.out.println("Enter the key (Capital letter):");
+        findKey = in1.nextLine();
+        if(findKey.equals("c")){
+            key = 60;
+        } else if(findKey.equals("C#") || findKey.equals("Db")){
+            key = 61;
+        } else if(findKey.equals("D")){
+            key = 62;
+        } else if(findKey.equals("D#") || findKey.equals("Eb")){
+            key = 63;
+        } else if(findKey.equals("E")){
+            key = 64;
+        } else if(findKey.equals("F")){
+            key = 65;
+        } else if(findKey.equals("F#") || findKey.equals("Gb")){
+            key = 66;
+        } else if(findKey.equals("G")){
+            key = 67;
+        } else if(findKey.equals("G#") || findKey.equals("Ab")){
+            key = 68;
+        } else if(findKey.equals("A")){
+            key = 69;
+        } else if(findKey.equals("A#") || findKey.equals("Bb")){
+            key = 70;
+        } else if(findKey.equals("B")){
+            key = 71;
         }
+        
+        Scanner in2 = new Scanner(System.in);
+        System.out.println("Major of Minor key?");
+        isMaj = in2.nextLine();
+        if(isMaj.equals("Major") || isMaj.equals("major")){
+            maj = true;
+        }else{
+            maj = false;
+        }
+        
+        Scanner in3 = new Scanner(System.in);
+        System.out.println("All quarter notes?");
+        isQuart = in3.nextLine();
+        if(isQuart.equals("yes")){
+            quart = true;
+        }else{
+            quart = false;
+        }
+            
+        Scanner in4 = new Scanner(System.in);
+        System.out.println("Just Treble?");
+        isTreb = in4.nextLine();
+        if(isTreb.equals("yes")){
+             hasBass = false;
+        }else{
+            hasBass = true;
+        }        
+        
+        Scanner in5 = new Scanner(System.in);
+        System.out.println("Enter some text:");
+        s = in5.nextLine();
         
         noteCalc(s);
     }
@@ -87,35 +138,64 @@ public class AudioText {
             num = (int)cList[i];
             
             note = (num%8);
+        if(maj){
             if (note == 0) {
-            finalNote = 60;
+            finalNote = key;
         } else if (note == 1) {
-            finalNote = 62;
+            finalNote = key+2;
         } else if (note == 2) {
-            finalNote = 64;
+            finalNote = key+4;
         } else if (note == 3) {
-            finalNote = 65;
+            finalNote = key+5;
         } else if (note == 4) {
-            finalNote = 67;
+            finalNote = key+7;
         } else if (note == 5) {
-            finalNote = 69;
+            finalNote = key+9;
         } else if (note == 6) {
-            finalNote = 71;
+            finalNote = key+11;
         } else {
-            finalNote = 72;
-            
+            finalNote = key+12;  
+        }
+       } else{
+          if (note == 0) {
+            finalNote = key;
+        } else if (note == 1) {
+            finalNote = key+2;
+        } else if (note == 2) {
+            finalNote = key+3;
+        } else if (note == 3) {
+            finalNote = key+5;
+        } else if (note == 4) {
+            finalNote = key+7;
+        } else if (note == 5) {
+            finalNote = key+8;
+        } else if (note == 6) {
+            finalNote = key+10;
+        } else {
+            finalNote = key+12;  
+        }  
         }
         bass = (num%3);
+        if(maj){
             if(bass == 0){
-                finalBass = 48;
+                finalBass = key-12;
         } else if (bass == 1){
-            finalBass = 53;
+            finalBass = key-7;
         } else{
-            finalBass = 55;
+            finalBass = key-5;
         }
+       } else{
+         if(bass == 0){
+                finalBass = key-12;
+        } else if (bass == 1){
+            finalBass = key-7;
+        } else{
+            finalBass = key-5;
+        }  
+       }
         
          dur = (num%5);
-            if(quarter == true){
+            if(quart == false){
             if (dur == 0) {
             finalDur = bpm/4;
          } else if (dur == 1) {
