@@ -3,20 +3,85 @@ import javax.sound.midi.*;
 import java.util.Scanner;
 import java.lang.*;
 import java.util.InputMismatchException;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
 //Created by Matthew Flanders
 //Created July 2015
 //Text-Music program
 //matthewf615@gmail.com
 
-public class AudioText {
+public class AudioText implements ActionListener{
     public static int bpm = 0;
     public static int key = 60;
     public static boolean quart = true;
     public static boolean maj = true;
     public static boolean hasBass = true;
+    public static JFrame frame;
+    public static JPanel content;
+    public static JTextArea text_pane;
+    public JTextField input_pane;
+    public static JLabel label;
+    public static String[] mode = {"Major", "Minor"};
+    public static String[] keys = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+    public static JComboBox modeList = new JComboBox(mode);
+    public static JComboBox keyList = new JComboBox(keys);
+    
+    public AudioText(){
+        makeFrame();
+    }
     public static void main( String[] args ) {
         controlLoop();
     }
+    
+    public static void controlLoop(){
+        findBpm();
+        getInput();
+    }
+    
+    private void makeFrame(){
+        frame = new JFrame("Audio to Text");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setPreferredSize(new Dimension(820,700));
+        content = (JPanel) frame.getContentPane();
+        
+        modeList.setSelectedIndex(0);
+        modeList.addActionListener(this);
+        keyList.setSelectedIndex(0);
+        keyList.addActionListener(this);
+        content.add(modeList);
+        content.add(keyList);
+       
+       
+        
+        frame.pack();
+        frame.setVisible(true);
+        
+    }
+    
+    public void actionPerformed(ActionEvent e){
+        if(e.getSource() == modeList){
+            JComboBox cb = (JComboBox)e.getSource();
+            String mode = (String)cb.getSelectedItem();
+            switch(mode){
+                case "Major": maj = true;
+                break;
+                case "Minor": maj = false;
+            }
+        } else if(e.getSource() == keyList){
+            JComboBox cb = (JComboBox)e.getSource();
+            String wkey = (String)cb.getSelectedItem();
+            switch(wkey){
+                case "C": key = 60;
+                break;
+                case "D": key = 62;
+            }
+        }
+        System.out.println(key);
+    }
+   
+   
     
     public static void play(int note, int channel, int dur, int vol, int bass){
         try {
@@ -43,11 +108,6 @@ public class AudioText {
             e.printStackTrace();
          }
         }
-        
-    public static void controlLoop(){
-        findBpm();
-        getInput();
-    }
     
     public static void getInput(){
         String s;
@@ -55,6 +115,7 @@ public class AudioText {
         String isMaj;
         String isQuart;
         String isTreb;
+        
         Scanner in1 = new Scanner(System.in);
         System.out.println("Enter the key (Capital letter):");
         findKey = in1.nextLine();
@@ -128,10 +189,9 @@ public class AudioText {
      }
      catch(InputMismatchException exception)
      {
-       System.out.println("This is not an integer");
        findBpm();
      }
-        return;
+     return;
         
     }
     
@@ -149,7 +209,7 @@ public class AudioText {
             num = (int)cList[i];
             
             note = (num%8);
-        if(maj){
+         if(maj){
             if (note == 0) {
             finalNote = key;
         } else if (note == 1) {
@@ -167,7 +227,7 @@ public class AudioText {
         } else {
             finalNote = key+12;  
         }
-       } else{
+        } else{
           if (note == 0) {
             finalNote = key;
         } else if (note == 1) {
@@ -222,10 +282,8 @@ public class AudioText {
             finalDur = bpm;
         }
             play(finalNote, 0, finalDur, 100, finalBass);
-            
-
            }
-        controlLoop();
+           controlLoop();
 
      }
 }
