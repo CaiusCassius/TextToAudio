@@ -5,6 +5,7 @@ import java.lang.*;
 //Created by Matthew Flanders
 //Created July 2015
 //Text-Music program
+//matthewf615@gmail.com
 
 public class AudioText {
     public static int bpm = 0;
@@ -27,11 +28,13 @@ public class AudioText {
             channels[channel].noteOn( note, vol );
             if(hasBass){
             channels[channel].noteOn( bass, vol );
+            channels[channel].noteOn( bass+7, vol);
            }
             Thread.sleep( dur );
             channels[channel].noteOff( note );
              if(hasBass){
             channels[channel].noteOff( bass );
+            channels[channel].noteOff( bass+7, vol);
            }
 
           }
