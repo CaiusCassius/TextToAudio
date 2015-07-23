@@ -2,6 +2,7 @@
 import javax.sound.midi.*;
 import java.util.Scanner;
 import java.lang.*;
+import java.util.InputMismatchException;
 //Created by Matthew Flanders
 //Created July 2015
 //Text-Music program
@@ -95,7 +96,7 @@ public class AudioText {
         Scanner in3 = new Scanner(System.in);
         System.out.println("All quarter notes?");
         isQuart = in3.nextLine();
-        if(isQuart.equals("yes")){
+        if(isQuart.equals("yes") || isQuart.equals("Yes")){
             quart = true;
         }else{
             quart = false;
@@ -104,7 +105,7 @@ public class AudioText {
         Scanner in4 = new Scanner(System.in);
         System.out.println("Just Treble?");
         isTreb = in4.nextLine();
-        if(isTreb.equals("yes")){
+        if(isTreb.equals("yes") || isTreb.equals("Yes")){
              hasBass = false;
         }else{
             hasBass = true;
@@ -118,11 +119,18 @@ public class AudioText {
     }
     
     public static void findBpm(){
-        int n;
-        Scanner in = new Scanner(System.in);
-        System.out.println("Enter BPM:");
-        n = in.nextInt();
-        bpm = 60000/n;
+     Scanner sc = new Scanner(System.in);
+      try
+      {
+       System.out.println("BPM:");
+       int n=sc.nextInt();
+       bpm = 60000/n;
+     }
+     catch(InputMismatchException exception)
+     {
+       System.out.println("This is not an integer");
+       findBpm();
+     }
         return;
         
     }
