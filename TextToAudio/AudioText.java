@@ -1,201 +1,211 @@
-
-import javax.sound.midi.*;
-import java.util.Scanner;
-import java.lang.*;
-import java.util.InputMismatchException;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.lang.*;
+import javax.sound.midi.*;
+import java.io.*;
+import java.util.Random;
 
-//Created by Matthew Flanders
-//Created July 2015
-//Text-Music program
-//matthewf615@gmail.com
-
-public class AudioText implements ActionListener{
-    public static int bpm = 0;
-    public static int key = 60;
-    public static boolean quart = true;
-    public static boolean maj = true;
-    public static boolean hasBass = true;
-    public static JFrame frame;
-    public static JPanel content;
-    public static JTextArea text_pane;
-    public JTextField input_pane;
-    public static JLabel label;
-    public static String[] mode = {"Major", "Minor"};
-    public static String[] keys = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
-    public static JComboBox modeList = new JComboBox(mode);
-    public static JComboBox keyList = new JComboBox(keys);
+ 
+public class AudioText extends JFrame {
+    static final String modeList[] = {"Major", "Minor"};
+    static final String keyList[] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+    static final String voiceList[] ={"Treble", "Treble and Bass"};
+    String finMode = "Major";
+    String finVoice = "Treble"; 
+    String key = "C";
+    int bpm;
+    int keyNote = 60;
+    int noteRand = 0;
+    int bassRand = 0;
+    int durRand = 0;
     
-    public AudioText(){
-        makeFrame();
+    final static int maxGap = 20;
+    JComboBox modeComboBox;
+    JComboBox keyComboBox;
+    JComboBox voiceComboBox;
+    JTextField bpmInput;
+    JTextField userIn;
+    JButton convertButton = new JButton("Convert");
+    JButton randButton = new JButton("Randomize Layout");
+    JButton resetButton = new JButton("Reset");
+    GridLayout experimentLayout = new GridLayout(1,0);
+     
+    public AudioText(String name) {
+        super(name);
+        setResizable(false);
     }
-    public static void main( String[] args ) {
-        controlLoop();
+     
+    public void initComboBox() {
+        modeComboBox = new JComboBox(modeList);
+        keyComboBox = new JComboBox(keyList);
+        voiceComboBox = new JComboBox(voiceList);
     }
-    
-    public static void controlLoop(){
-        findBpm();
-        getInput();
-    }
-    
-    private void makeFrame(){
-        frame = new JFrame("Audio to Text");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(820,700));
-        content = (JPanel) frame.getContentPane();
+     
+    public void addComponentsToPane(final Container pane) {
+        initComboBox();
+        final JPanel text_pane = new JPanel();
+        text_pane.setLayout(experimentLayout);
+        JPanel controls = new JPanel();
+        controls.setLayout(new GridLayout(0,2));
+         
+        //Set up components preferred size
+        text_pane.setPreferredSize(new Dimension(300,280));
+         
+        //Add textField
+        userIn = new JTextField("", 0);
+        getContentPane().add(userIn);
+        userIn.setSize(400,220);
+        userIn.setVisible(true);
         
-        modeList.setSelectedIndex(0);
-        modeList.addActionListener(this);
-        keyList.setSelectedIndex(0);
-        keyList.addActionListener(this);
-        content.add(modeList);
-        content.add(keyList);
-       
-       
+        bpmInput = new JTextField("120", 0);
+        bpmInput.setSize(20,20);
+        bpmInput.setVisible(true);
         
-        frame.pack();
-        frame.setVisible(true);
+         
+        //Add controls to set up horizontal and vertical gaps
+        controls.add(new Label("Mode"));
+        controls.add(new Label("BPM"));
+        controls.add(modeComboBox);
+        controls.add(bpmInput);
+        controls.add(new Label("Key"));
+        controls.add(new Label("Voices"));
         
-    }
-    
-    public void actionPerformed(ActionEvent e){
-        if(e.getSource() == modeList){
-            JComboBox cb = (JComboBox)e.getSource();
-            String mode = (String)cb.getSelectedItem();
-            switch(mode){
-                case "Major": maj = true;
-                break;
-                case "Minor": maj = false;
+        controls.add(keyComboBox);
+        controls.add(voiceComboBox);
+        controls.add(convertButton);
+        controls.add(resetButton);
+        controls.add(randButton);
+         
+        //Process the Apply gaps button press
+        convertButton.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                //Get the final mode
+                finMode = (String)modeComboBox.getSelectedItem();
+                switch(finMode){
+                    case "Major": finMode = "Major";
+                    break;
+                    case "Minor": finMode = "Minor";
+                }
+                
+                //Get the final voice
+                finVoice = (String)voiceComboBox.getSelectedItem();
+                switch(finVoice){
+                    case "Treble": finVoice = "Treble";
+                    break;
+                    case "Treble and Bass": finVoice = "Treble and Bass";
+                }
+                
+                //Get the final key
+                key = (String)keyComboBox.getSelectedItem();
+                switch(key){
+                    case "C": keyNote = 60;
+                    break;
+                    case "C#": keyNote = 61;
+                    break;
+                    case "D": keyNote = 62;
+                    break;
+                    case "D#": keyNote = 63;
+                    break;
+                    case "E": keyNote = 64;
+                    break;
+                    case "F": keyNote = 65;
+                    break;
+                    case "F#": keyNote = 66;
+                    break;
+                    case "G": keyNote = 67;
+                    break;
+                    case "G#": keyNote = 68;
+                    break;
+                    case "A": keyNote = 69;
+                    break;
+                    case "A#": keyNote = 70;
+                    break;
+                    case "B": keyNote = 71;
+                    break;
+                }
+                
+                int i = Integer.parseInt(bpmInput.getText());
+                bpm = 60000/i;
+                String s = userIn.getText();
+                noteCalc(s);
             }
-        } else if(e.getSource() == keyList){
-            JComboBox cb = (JComboBox)e.getSource();
-            String wkey = (String)cb.getSelectedItem();
-            switch(wkey){
-                case "C": key = 60;
-                break;
-                case "D": key = 62;
+        });
+        
+        randButton.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                Random rand = new Random(); 
+                int value = rand.nextInt(8); 
+                int value2 = rand.nextInt(5);
+                int value3 = rand.nextInt(3);
+                int modeRand = rand.nextInt(2);
+                int keyRand = rand.nextInt(12);
+                int bpmRand = rand.nextInt(300) + 60;
+                int voiceRand = rand.nextInt(2);
+                
+                switch(modeRand){
+                    case 0: modeComboBox.setSelectedItem("Major");
+                    break;
+                    case 1: modeComboBox.setSelectedItem("Minor");
+                    break;
+                }
+                switch(keyRand){
+                    case 0: keyComboBox.setSelectedItem("C");
+                    break;
+                    case 1: keyComboBox.setSelectedItem("C#");
+                    break;
+                    case 2: keyComboBox.setSelectedItem("D");
+                    break;
+                    case 3: keyComboBox.setSelectedItem("D#");
+                    break;
+                    case 4: keyComboBox.setSelectedItem("E");
+                    break;
+                    case 5: keyComboBox.setSelectedItem("F");
+                    break;
+                    case 6: keyComboBox.setSelectedItem("F#");
+                    break;
+                    case 7: keyComboBox.setSelectedItem("G");
+                    break;
+                    case 8: keyComboBox.setSelectedItem("G#");
+                    break;
+                    case 9: keyComboBox.setSelectedItem("A");
+                    break;
+                    case 10: keyComboBox.setSelectedItem("A#");
+                    break;
+                    case 11: keyComboBox.setSelectedItem("B");
+                    break;
+                }
+                switch(modeRand){
+                    case 0: voiceComboBox.setSelectedItem("Treble");
+                    break;
+                    case 1: voiceComboBox.setSelectedItem("Treble and Bass");
+                    break;
+                }
+                bpmInput.setText(String.valueOf(bpmRand));
+                noteRand = value;
+                durRand = value2;
+                bassRand = value3;
             }
-        }
-        System.out.println(key);
+        });
+        
+        resetButton.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                noteRand = 0;
+                bassRand = 0;
+                durRand = 0;
+                voiceComboBox.setSelectedItem("Treble");
+                modeComboBox.setSelectedItem("Major");
+                keyComboBox.setSelectedItem("C");
+                bpmInput.setText(String.valueOf(120));
+            }
+        });
+        pane.add(text_pane, BorderLayout.CENTER);
+        pane.add(new JSeparator(), BorderLayout.NORTH);
+        pane.add(controls, BorderLayout.SOUTH);
     }
-   
-   
-    
-    public static void play(int note, int channel, int dur, int vol, int bass){
-        try {
-            Synthesizer syn = MidiSystem.getSynthesizer();
-            syn.open();
-            Instrument[] instr = syn.getDefaultSoundbank().getInstruments();
-            syn.loadInstrument(instr[1]);
-            MidiChannel[] channels = syn.getChannels();
-            
-            channels[channel].noteOn( note, vol );
-            if(hasBass){
-            channels[channel].noteOn( bass, vol );
-            channels[channel].noteOn( bass+7, vol);
-           }
-            Thread.sleep( dur );
-            channels[channel].noteOff( note );
-             if(hasBass){
-            channels[channel].noteOff( bass );
-            channels[channel].noteOff( bass+7, vol);
-           }
 
-          }
-           catch (Exception e) {
-            e.printStackTrace();
-         }
-        }
-    
-    public static void getInput(){
-        String s;
-        String findKey;
-        String isMaj;
-        String isQuart;
-        String isTreb;
-        
-        Scanner in1 = new Scanner(System.in);
-        System.out.println("Enter the key (Capital letter):");
-        findKey = in1.nextLine();
-        if(findKey.equals("c")){
-            key = 60;
-        } else if(findKey.equals("C#") || findKey.equals("Db")){
-            key = 61;
-        } else if(findKey.equals("D")){
-            key = 62;
-        } else if(findKey.equals("D#") || findKey.equals("Eb")){
-            key = 63;
-        } else if(findKey.equals("E")){
-            key = 64;
-        } else if(findKey.equals("F")){
-            key = 65;
-        } else if(findKey.equals("F#") || findKey.equals("Gb")){
-            key = 66;
-        } else if(findKey.equals("G")){
-            key = 67;
-        } else if(findKey.equals("G#") || findKey.equals("Ab")){
-            key = 68;
-        } else if(findKey.equals("A")){
-            key = 69;
-        } else if(findKey.equals("A#") || findKey.equals("Bb")){
-            key = 70;
-        } else if(findKey.equals("B")){
-            key = 71;
-        }
-        
-        Scanner in2 = new Scanner(System.in);
-        System.out.println("Major of Minor key?");
-        isMaj = in2.nextLine();
-        if(isMaj.equals("Major") || isMaj.equals("major")){
-            maj = true;
-        }else{
-            maj = false;
-        }
-        
-        Scanner in3 = new Scanner(System.in);
-        System.out.println("All quarter notes?");
-        isQuart = in3.nextLine();
-        if(isQuart.equals("yes") || isQuart.equals("Yes")){
-            quart = true;
-        }else{
-            quart = false;
-        }
-            
-        Scanner in4 = new Scanner(System.in);
-        System.out.println("Just Treble?");
-        isTreb = in4.nextLine();
-        if(isTreb.equals("yes") || isTreb.equals("Yes")){
-             hasBass = false;
-        }else{
-            hasBass = true;
-        }        
-        
-        Scanner in5 = new Scanner(System.in);
-        System.out.println("Enter some text:");
-        s = in5.nextLine();
-        
-        noteCalc(s);
-    }
-    
-    public static void findBpm(){
-     Scanner sc = new Scanner(System.in);
-      try
-      {
-       System.out.println("BPM:");
-       int n=sc.nextInt();
-       bpm = 60000/n;
-     }
-     catch(InputMismatchException exception)
-     {
-       findBpm();
-     }
-     return;
-        
-    }
-    
-    public static void noteCalc(String s){
+ 
+    public void noteCalc(String s){
         String text = s;
         char[]cList = text.toCharArray();
         int num;
@@ -205,85 +215,160 @@ public class AudioText implements ActionListener{
         int finalDur;
         int finalNote;
         int finalBass;
+        
+        int[]noteRandList = new int[8];
+        int current = noteRand;
+        for(int i = 0; i < noteRandList.length; i++){
+            noteRandList[i] = current;
+            current++;
+            if(current >= 8){
+                current = current%8;
+            }
+        }
+        
+        int[]bassRandList = new int[3];
+        int current2 = bassRand;
+        for(int i = 0; i < bassRandList.length; i++){
+            bassRandList[i] = current2;
+            current2++;
+            if(current2 >= 3){
+                current = current%3;
+            }
+        }
+        
+        int[]durRandList = new int[5];
+        int current3 = durRand;
+        for(int i = 0; i < durRandList.length; i++){
+            durRandList[i] = current3;
+            current2++;
+            if(current2 >= 5){
+                current = current%5;
+            }
+        }
+        
         for(int i = 0; i < cList.length; i++){
             num = (int)cList[i];
             
             note = (num%8);
-         if(maj){
-            if (note == 0) {
-            finalNote = key;
-        } else if (note == 1) {
-            finalNote = key+2;
-        } else if (note == 2) {
-            finalNote = key+4;
-        } else if (note == 3) {
-            finalNote = key+5;
-        } else if (note == 4) {
-            finalNote = key+7;
-        } else if (note == 5) {
-            finalNote = key+9;
-        } else if (note == 6) {
-            finalNote = key+11;
-        } else {
-            finalNote = key+12;  
-        }
+            if(finMode.equals("Major")){
+            if (note == noteRandList[0]) {
+            finalNote = keyNote;
+         } else if (note == noteRandList[1]) {
+            finalNote = keyNote+2;
+         } else if (note == noteRandList[2]) {
+            finalNote = keyNote+4;
+         } else if (note == noteRandList[3]) {
+            finalNote = keyNote+5;
+         } else if (note == noteRandList[4]) {
+            finalNote = keyNote+7;
+         } else if (note == noteRandList[5]) {
+            finalNote = keyNote+9;
+         } else if (note == noteRandList[6]) {
+            finalNote = keyNote+11;
+         } else{
+            finalNote = keyNote+12;  
+         }
         } else{
           if (note == 0) {
-            finalNote = key;
+            finalNote = keyNote;
         } else if (note == 1) {
-            finalNote = key+2;
+            finalNote = keyNote+2;
         } else if (note == 2) {
-            finalNote = key+3;
+            finalNote = keyNote+3;
         } else if (note == 3) {
-            finalNote = key+5;
+            finalNote = keyNote+5;
         } else if (note == 4) {
-            finalNote = key+7;
+            finalNote = keyNote+7;
         } else if (note == 5) {
-            finalNote = key+8;
+            finalNote = keyNote+8;
         } else if (note == 6) {
-            finalNote = key+10;
-        } else {
-            finalNote = key+12;  
+            finalNote = keyNote+10;
+        } else{
+            finalNote = keyNote+12;  
         }  
         }
         bass = (num%3);
-        if(maj){
-            if(bass == 0){
-                finalBass = key-12;
-        } else if (bass == 1){
-            finalBass = key-7;
+        if(finMode.equals("Major")){
+            if(bass == bassRandList[0]){
+                finalBass = keyNote-12;
+        } else if (bass == bassRandList[1]){
+            finalBass = keyNote-7;
         } else{
-            finalBass = key-5;
+            finalBass = keyNote-5;
         }
        } else{
          if(bass == 0){
-                finalBass = key-12;
+                finalBass = keyNote-12;
         } else if (bass == 1){
-            finalBass = key-7;
+            finalBass = keyNote-7;
         } else{
-            finalBass = key-5;
-        }  
+            finalBass = keyNote-5;
+        } 
        }
+       
         
          dur = (num%5);
-            if(quart == false){
-            if (dur == 0) {
+          
+            if (dur == durRandList[0]) {
             finalDur = bpm/4;
-         } else if (dur == 1) {
+         } else if (dur == durRandList[1]) {
             finalDur = bpm/2;
-         } else if (dur == 2) {
+         } else if (dur == durRandList[2]) {
             finalDur = bpm;
-         } else if (dur == 3) {
+         } else if (dur == durRandList[3]) {
             finalDur = bpm*2;
          } else {
             finalDur = (bpm*2)+bpm;
          }
-        } else{
-            finalDur = bpm;
-        }
             play(finalNote, 0, finalDur, 100, finalBass);
            }
-           controlLoop();
+
 
      }
+    
+
+     
+    public  void play(int note, int channel, int dur, int vol, int bass){
+        try {
+            Synthesizer syn = MidiSystem.getSynthesizer();
+            syn.open();
+            Instrument[] instr = syn.getDefaultSoundbank().getInstruments();
+            syn.loadInstrument(instr[1]);
+            MidiChannel[] channels = syn.getChannels();
+            
+            channels[channel].noteOn( note, vol );
+            if(finVoice.equals("Treble and Bass")){
+            channels[channel].noteOn( bass, vol );
+           }
+            Thread.sleep( dur );
+            channels[channel].noteOff( note );
+            channels[channel].noteOff( bass );
+          }
+           catch (Exception e) {
+            e.printStackTrace();
+         }
+        }
+
+    private static void createAndShowGUI() {
+        //Create and set up the window.
+        AudioText frame = new AudioText("Note for Note");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //Set up the content pane.
+        frame.addComponentsToPane(frame.getContentPane());
+        frame.setPreferredSize(new Dimension(400,400));
+        //Display the window.
+        frame.pack();
+        frame.setVisible(true);
+    }
+     
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+        } catch (Exception e){}
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                createAndShowGUI();
+            }
+        });
+    }
 }
