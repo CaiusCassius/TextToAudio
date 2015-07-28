@@ -77,7 +77,7 @@ public class AudioText extends JFrame {
         controls.add(resetButton);
         controls.add(randButton);
          
-        //Process the Apply gaps button press
+        //Process the conversion 
         convertButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 //Get the final mode
@@ -125,6 +125,7 @@ public class AudioText extends JFrame {
                     break;
                 }
                 
+                //get the bpm by
                 int i = Integer.parseInt(bpmInput.getText());
                 bpm = 60000/i;
                 String s = userIn.getText();
@@ -132,6 +133,7 @@ public class AudioText extends JFrame {
             }
         });
         
+        //process the randomizer
         randButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 Random rand = new Random(); 
@@ -143,12 +145,15 @@ public class AudioText extends JFrame {
                 int bpmRand = rand.nextInt(300) + 60;
                 int voiceRand = rand.nextInt(2);
                 
+                //switch the mode
                 switch(modeRand){
                     case 0: modeComboBox.setSelectedItem("Major");
                     break;
                     case 1: modeComboBox.setSelectedItem("Minor");
                     break;
                 }
+                
+                //switch the key
                 switch(keyRand){
                     case 0: keyComboBox.setSelectedItem("C");
                     break;
@@ -175,7 +180,9 @@ public class AudioText extends JFrame {
                     case 11: keyComboBox.setSelectedItem("B");
                     break;
                 }
-                switch(modeRand){
+                
+                //switch the voicing
+                switch(voiceRand){
                     case 0: voiceComboBox.setSelectedItem("Treble");
                     break;
                     case 1: voiceComboBox.setSelectedItem("Treble and Bass");
@@ -188,6 +195,7 @@ public class AudioText extends JFrame {
             }
         });
         
+        //process the reset 
         resetButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 noteRand = 0;
@@ -199,6 +207,7 @@ public class AudioText extends JFrame {
                 bpmInput.setText(String.valueOf(120));
             }
         });
+        
         pane.add(text_pane, BorderLayout.CENTER);
         pane.add(new JSeparator(), BorderLayout.NORTH);
         pane.add(controls, BorderLayout.SOUTH);
@@ -216,6 +225,7 @@ public class AudioText extends JFrame {
         int finalNote;
         int finalBass;
         
+        //create an arry and store values of root note
         int[]noteRandList = new int[8];
         int current = noteRand;
         for(int i = 0; i < noteRandList.length; i++){
@@ -226,6 +236,7 @@ public class AudioText extends JFrame {
             }
         }
         
+        //create an arry and store values of root bass
         int[]bassRandList = new int[3];
         int current2 = bassRand;
         for(int i = 0; i < bassRandList.length; i++){
@@ -236,6 +247,7 @@ public class AudioText extends JFrame {
             }
         }
         
+        //create an arry and store values of root duration
         int[]durRandList = new int[5];
         int current3 = durRand;
         for(int i = 0; i < durRandList.length; i++){
