@@ -321,16 +321,16 @@ public class AudioText extends JFrame {
         
          dur = (num%5);
           
-            if (dur == durRandList[0]) {
+            if (dur == 0) {
             finalDur = bpm/4;
-         } else if (dur == durRandList[1]) {
+         } else if (dur == 1) {
             finalDur = bpm/2;
-         } else if (dur == durRandList[2]) {
+         } else if (dur == 2) {
             finalDur = bpm;
-         } else if (dur == durRandList[3]) {
+         } else if (dur == 3) {
             finalDur = bpm*2;
          } else {
-            finalDur = (bpm*2)+bpm;
+            finalDur = (bpm*3);
          }
             play(finalNote, 0, finalDur, 100, finalBass);
            }
@@ -354,7 +354,9 @@ public class AudioText extends JFrame {
            }
             Thread.sleep( dur );
             channels[channel].noteOff( note );
+            if(finVoice.equals("Treble and Bass")){
             channels[channel].noteOff( bass );
+           }
           }
            catch (Exception e) {
             e.printStackTrace();
